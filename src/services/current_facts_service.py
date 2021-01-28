@@ -1,10 +1,9 @@
 import pandas as pd
-import warnings
 
 from src.utils.boolean_util import str_to_bool
 
-class CurrentFactsService:
 
+class CurrentFactsService:
 
     def get_current_facts(self, facts, schema):
 
@@ -31,21 +30,17 @@ class CurrentFactsService:
 
         return current_facts
 
-    def _remove_retracted_information(self, facts):
+    @staticmethod
+    def _load_schema(schema):
 
-        facts = [tup for tup in facts if str_to_bool(tup[-1]) is True]
-
-        return facts
-
-    def _load_schema(self, schema):
-
-        # schema validation
-        try:
-            for setup in schema:
-                if setup[1] is not 'cardinality' and len(setup) is not 3:
-                    raise Exception("Schema format not supported")
-        except:
+        # validate schema not empty
+        if len(schema) == 0:
             raise Exception("Schema not found")
+
+        # validate schema format
+        for setup in schema:
+            if setup[1] is not 'cardinality' and len(setup) is not 3:
+                raise Exception("Schema format not supported")
 
         loaded_schema = {}
 
@@ -61,15 +56,19 @@ class CurrentFactsService:
 
         return loaded_schema
 
+    @staticmethod
+    def _validate_facts(facts):
 
-    def _validate_facts(self, facts):
-
-        try:
-            for fact in facts:
-                if len(fact) is not 4:
-                    raise Exception("Facts format not supported")
-        except:
+        # validate facts not empty
+        if len(facts) == 0:
             raise Exception("Facts not found")
+
+        # validate facts format
+        for fact in facts:
+            if len(fact) is not 4:
+                raise Exception("Facts format not supported")
+            if type(fact[0]) is not str or type(fact[1]) is not str or type(fact[2]) is not str:
+                raise Exception("Facts format not supported")
 
         phone_validated_facts = []
 
@@ -79,8 +78,8 @@ class CurrentFactsService:
                 phone_validated_facts.append(fact)
             elif fact[1] == 'endereço':
                 phone_validated_facts.append(fact)
-            else:
-                warnings.warn('Telephone number format not valid')
 
+        # remove retracted information
+        validated_facts = [tup for tup in phone_validated_facts if str_to_bool(tup[-1]) is True]
 
-        return self._remove_retracted_information(phone_validated_facts)
+        return validated_facts

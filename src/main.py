@@ -11,7 +11,8 @@ class Main:
     def run(self):
 
         current_facts_response = self.current_facts_service.get_current_facts(facts=facts, schema=schema)
-        print(current_facts_response)
+        for current_facts in current_facts_response:
+            print(current_facts)
 
 
 if __name__ == "__main__":
